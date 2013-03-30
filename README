@@ -1,0 +1,777 @@
+(C) Copyright 2010 The Board of Trustees of the University of Illinois.
+All rights reserved.
+
+Developed by:
+
+                     IMPACT & MRFIL Research Groups
+                University of Illinois, Urbana Champaign
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal with the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimers.
+
+Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimers in the documentation
+and/or other materials provided with the distribution.
+
+Neither the names of the IMPACT Research Group, MRFIL Research Group, the
+University of Illinois, nor the names of its contributors may be used to
+endorse or promote products derived from this Software without specific
+prior written permission.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH
+THE SOFTWARE.
+
+------------------------------ Chapter separator ------------------------------
+
+                                    Prolog
+                                    ------
+
+This is the readme file of the MRI package. This package is contributed by the
+IMPACT and MRFIL research groups in University of Illinois at Urbana-Champaign.
+
+------------------------------ Chapter separator ------------------------------
+
+                               Table of contents
+                               -----------------
+
+1. Introduction
+2. Package revision history
+3. Environment setup
+4. How to compile and run
+5. How to integrate it with your project
+6. Todo list and future work
+
+------------------------------ Chapter separator ------------------------------
+
+1. Introduction
+
+The MRI toolset is an implementation in CUDA for iterative MR image reconstruction 
+using Graphics Processing Units (GPUs). It is used in the research of medical ima-
+ging, especially in the area of image reconstruction for magnetic resonance imaging
+(MRI). In our experiments, this implementation significantly reduces the computation
+times by two orders of magnitude (compared with the non-GPU implementation) while 
+accurately compensating for field inhomogeneity, parallel imaging(SENSE).
+
+For more information about this work, please refer to the following publications.
+
+* Jiading Gai, Joseph L. Holtrop, Xiao-Long Wu, Fan Lam, Maojing Fu, Justin P. Haldar, 
+Wen-mei W. Hwu, Zhi-Pei Liang, Bradley P. Sutton, More IMPATIENT: A Gridding-Accelerated 
+Toeplitz-Based Strategy for Non-Cartesian High-Resolution 3D MRI on GPU, Proceedings of 
+the International Society for Magnetic Resonance in Medicine (ISMRM), May 2012.
+
+* Xiao-Long Wu, Jiading Gai, Fan Lam, Maojing Fu, Justin Haldar, Yue Zhuo, Zhi-Pei 
+Liang, Wen-Mei Hwu, Bradley Sutton, IMPATIENT MRI: Illinois Massively Parallel Accel-
+eration Toolkit for Image reconstruction with ENhanced Throughput in MRI, Proceedings 
+of the International Society for Magnetic Resonance in Medicine (ISMRM), May 2011.
+
+* Xiao-Long Wu, Jiading Gai, Fan Lam, Maojing Fu, Justin Haldar, Yue Zhuo, Zhi-Pei 
+Liang, Wen-Mei Hwu, Bradley Sutton, IMPATIENT MRI: Illinois Massively Parallel Accele-
+ration Toolkit for Image reconstruction with ENhanced Throughput in MRI, Proceedings 
+of the IEEE International Symposium on Biomedical Imaging (ISBI), March 2011.
+
+* Xiao-Long Wu, Yue Zhuo, Jiading Gai, Fan Lam, Maojing Fu, Justin P. Haldar, Wen-mei
+Hwu, Zhi-Pei Liang, Bradley P. Sutton, "Advanced MRI Reconstruction Toolbox with Accel-
+erating on GPU," SPIE 2011.
+
+* Yue Zhuo, Xiao-Long Wu, Justin P. Haldar, Thibault Marin, Wen-mei Hwu, Zhi-Pei Liang, 
+Bradley P. Sutton, "Using GPUs to Accelerate Advanced MRI Reconstruction with Field 
+Inhomogeneity Compensation," GPU Computing Gems, Book Chapter 44, Elsevier Inc., 2011.
+
+* Yue Zhuo, Xiao-Long Wu, Justin P. Haldar, Wen-mei Hwu, Zhi-Pei Liang, Bradley P. Sutton, 
+Multi-GPU Implementation for Iterative MR Image Reconstruction with Field Correction, 
+Proceeding of International Society for Magnetic Resonance in Medicine (ISMRM) 2010.
+
+* Yue Zhuo, Xiao-Long Wu, Justin P. Haldar, Wen-mei Hwu, Zhi-Pei Liang, Bradley P. Sutton, 
+Accelerating Iterative Field-Compensated MR Image Reconstruction on GPUs, IEEE Internatio-
+nal Symposium on Biomedical Imaging (ISBI) 2010.
+
+------------------------------ Chapter separator ------------------------------
+
+2. Package revision history
+
+   Package version : 3.1 alpha
+   Release date    : 03/21/2012
+   Author list     : Jiading Gai, Beckman Institute UIUC (jgai@illinois.edu)
+                     Joseph L. Holtrop, Bioengineering UIUC (holtrop1@illinois.edu)
+                     Xiao-Long Wu, ECE UIUC (xiaolong@illinois.edu)
+                     Fan Lam, ECE UIUC (fanlam1@illinois.edu)
+                     Maojing Fu, ECE UIUC (mfu2@illinois.edu)
+   Synopsis        : The third major release.
+   New Features    :
+       -   Two flags (-writeQ and -reuseQ <path>) have been added to facilitate the 
+           customization of IMPATIENT to specific MRI application, such as fMRI. Recall
+           that Toeplitz method is perfect for applications such as fmri, where each 
+           slice in every data point shares the same scan trajectory and image s-
+           ize. A significant portion of the computation in Toeplitz method is the
+           calculation of Q matrices, which facilitates multiplication operations
+           involving F^HF and depends only on the scan trajectory (not the scan da-
+           ta) and the size of the image. Hence, in a task like fmri, Q can be com-
+           puted once prior to acquiring an image's scan data and re-used on each 
+           slice. In this way, the critical path for a given reconstruction consists 
+           only of compputing F^H(d) and executing the CG solver. Please refer to section 4.3
+           for more details on the usage of -writeQ and -reuseQ.
+ 
+ 
+   Package version : 3.0 alpha
+   Release date    : 03/16/2012
+   Author list     : Jiading Gai, Beckman Institute UIUC (jgai@illinois.edu)
+                     Joseph L. Holtrop, Bioengineering UIUC (holtrop1@illinois.edu)
+                     Xiao-Long Wu, ECE UIUC (xiaolong@illinois.edu)
+                     Fan Lam, ECE UIUC (fanlam1@illinois.edu)
+                     Maojing Fu, ECE UIUC (mfu2@illinois.edu)
+   Synopsis        : The third major release.
+   New Features    :
+       - In the previous release (2.0 alpha), we implemented a fast image reconstruction routine 
+         for reconstruction of arbitrary 3D imaging trajectories using the Toeplitz computation 
+         structure. In this release (3.0 alpha), we introduce a new IMPATIENT which removes bottlenecks 
+         to the computation by implementing the formation of the Toeplitz operator and formation 
+         of the data input structure in a fast, gridding implementation. Further, we adapt 
+         the algorithm to perform field correction and parallel imaging for large, arbitrary 
+         3D sampling trajectories. Speed-ups of up to a factor of 1000 are provided in the 
+         improved GPU implementation compared to the previous accelerated GPU code.
+
+       - 3.0 alpha provides users with three different types of MRI reconstruction strategies.
+         In reverse chronological order, they are:
+         
+         2) Toeplitz with gridding:
+            . Support both 2D and 3D, arbitrary trajectory.
+            . Fast evaluations of Q (step 1) and FHD (step 2) using gridding algorithm.
+            . Quickest among the three strategies, but approximate.
+
+                    -> With a decent gridding oversampling factor, the average 
+                       percentage error introduced by gridding is around 1%
+
+            . Arbitrary single precision gridding oversampling ratio between [1.0,2.0].
+
+                    -> It is found that significant reductions in computation memory and 
+                       time can be obtained while maintaining high accuracy by using a 
+                       minimal oversampling ratio, from 1.125 to 1.375, instead of the 
+                       typically employed grid oversampling ratio of two.
+
+            . Equipped with various regularization forms:
+
+                    -> spatial roughness penalty,
+                    -> quadratic regularization 
+                    -> total variation.
+              
+              IMPATIENT 3.0 alpha provides two equivalent ways to implement the regularization 
+              function: 1) sparse matrix ; 2) explicit finite difference calculations.
+
+         1) Toeplitz with direct evaluations of $Q$ and $F^HD$:
+            . Support both 2D and 3D, arbitrary trajectory.
+            . Direct evaluations of Q (step 1) and FHD (step 2) using their equations.
+            . slower than Toeplitz with gridding, but as accurate as Brute Force.
+
+                     -> If Q can be re-used in an MRI experiment on multiple slice, it
+                        can also be much faster than Brute Force
+
+           . Equipped with various regularization forms:
+
+                    -> spatial roughness penalty,
+                    -> quadratic regularization 
+                    -> total variation.
+              
+              IMPATIENT 3.0 alpha provides two equivalent ways to implement the regularization 
+              function: 1) sparse matrix ; 2) explicit finite difference calculations.
+
+
+          0) Brute Force:
+            . Support only 2D data, arbitrary trajectory.
+            . Exhaustive evaluation of the entire system equation (both forward and adjoint operators).
+            . Equipped with various regularization forms:
+
+                    -> spatial roughness penalty,
+                    -> quadratic regularization 
+                    -> total variation.
+              
+              IMPATIENT 3.0 alpha provides two equivalent ways to implement the regularization 
+              function: 1) sparse matrix ; 2) explicit finite difference calculations.
+
+
+   Package version : 2.0 alpha
+   Release date    : 05/06/2011
+   Author list     : Xiao-Long Wu, ECE UIUC (xiaolong@illinois.edu)
+                     Jiading Gai, Beckman Institute UIUC (jgai@illinois.edu)
+                     Fan Lam, ECE UIUC (fanlam1@illinois.edu)
+                     Maojing Fu, ECE UIUC (mfu2@illinois.edu)
+                     Yue Zhuo, BIOE UIUC (yuezhuo2@illinois.edu)
+   Synopsis        : The second major release.
+   New Features    :
+       - Toeplitz reconstruction strategy is implemented to provide users with
+         a choice of the tradeoff between accuracy (Brute Force) and speed (To-
+         eplitz).
+         . Takes advantages of Toeplitz formulation for fast computation of sys-
+           tem matrix computations.
+         . Field inhomogeneity performed via time segmentation.
+         . Toeplitz involves approximation, but is also faster. Tradeoff between
+           number of time segments for accuracy and computation time.
+         . Toeplitz method is perfect for applications such as fmri, where each 
+           slice in every data point shares the same scan trajectory and image s-
+           ize. A significant portion of the computation in Toeplitz method is the
+           calculation of Q matrices, which facilitates multiplication operations
+           involving F^HF and depends only on the scan trajectory (not the scan da-
+           ta) and the size of the image. Hence, in a task like fmri, Q can be com-
+           puted once prior to acquiring an image's scan data and re-used on each 
+           slice. In this way, the critical path for a given reconstruction consists 
+           only of compputing F^H(d) and executing the CG solver.
+         . More details on Toeplitz: JA Fessler, S Lee, VT Olafsson, HR Shi, DC Noll. 
+           IEEE Trans Sign Proc, 53(9): 3393-3402.  
+       - Toeplitz strategy supports sensitivity Encoding for Fast MRI recon-
+         struction (SENSE) and total variation (TV) based regularization in our SENSE
+         framework (solved using an alternating minimization algorithm called half-
+         quadratic minimization). We provide two ways to encode the regularization matrix
+         . finite difference (directly calculated on-the-fly).
+         . compressed row sparse matrix (pre-calculated prior to the recon task).
+       - Toeplitz method is designed to handle larger image size from 256x256 to
+         512x512.
+       - No CPU code is available.
+
+   Package version : 1.0 alpha
+   Release date    : 11/19/2010
+   Author list     : Xiao-Long Wu, ECE UIUC (xiaolong@illinois.edu)
+                     Jiading Gai, Beckman Institute UIUC (jgai@illinois.edu)
+                     Fan Lam, ECE UIUC (fanlam1@illinois.edu)
+                     Maojing Fu, ECE UIUC (mfu2@illinois.edu)
+                     Yue Zhuo, BIOE UIUC (yuezhuo2@illinois.edu)
+   Synopsis        : The first major release.
+   New Features    :
+       - Supports Sensitivity Encoding for Fast MRI reconstruction (SENSE).
+       - Incorporates a total variation based regularization in our SENSE
+         framework. (solved using an alternating minimization algorithm called
+         half-quadratic minimization). We provide two ways to encode the
+         regularization matrix
+         . sparse matrix (pre-calculated prior to the recon task).
+         . finite difference (directly calculated on-the-fly).
+       - Enable SMVM to increase image quality but some bugs exist.
+       - FT and IFT are extended to handle larger image size from 256x256 to
+         512x512. (We have some bugs on 1024x1024 images.)
+
+   Package version : 0.1
+   Release date    : 04/16/2010
+   Author list     : Xiao-Long Wu, ECE UIUC (xiaolong@illinois.edu)
+                     Yue Zhuo, BIOE UIUC (yuezhuo2@illinois.edu)
+   Synopsis        : The first release.
+   Description     : Here lists the key functions of this package.
+       - Use the algorithms mainly referred in the papers, ISMRM 2010 and ISBI
+         2010.
+       - Multi-GPU platforms are supported.
+       - GPU code is modified to accommodate GPU platforms with/out double-
+         precision hardware.
+       - CPU code is optimized with OpenMP.
+       - C++ language is used to facilitate the cooperation with other
+         projects.
+
+------------------------------ Chapter separator ------------------------------
+
+3. Environment setup
+
+   To compile this package you must have the following package installed.
+
+   3.1 A Linux-Like Environment
+
+       We have successfully tested the package on the following environment.
+       However, your system shall work if that's not listed below because
+       we didn't use platform-specific libraries.
+
+           - Ubuntu: 9.10, 10.04
+           - Debian: 4.3.5
+           - Fedora: 12 13 14
+           - Mac OS X: 10.06
+
+       We haven't tested the package under Windows platforms. But since we
+       don't use specific libraries for Linux-like platforms, you should be
+       able to use Windows-based compilers to build the package with/out
+       minor modifications.
+
+   3.2 NVIDIA Graphics Card
+
+       We have successfully tested the package with the following cards. Yet,
+       your graphics card shall work as long as it's supported by the NVIDIA
+       CUDA.
+
+           - Tesla C2050
+           - GeForce GTX 480
+           - GeForce GTX 280
+           - GeForce 8800 GTX
+           - GeForce 8600M GT
+           - Quadro FX 5600
+
+   3.3 NVIDIA CUDA Developer Driver
+
+       After you installed the operating system, the NVIDIA graphics card
+       device driver should have been installed. If not, you can download the
+       driver from one of the following links.
+
+       Driver version: 260.19.21
+       http://developer.nvidia.com/object/cuda_3_2_downloads.html
+
+       Driver version: 195.36.15
+       http://developer.nvidia.com/object/cuda_3_0_downloads.html
+
+       Driver version: 190.53
+       http://developer.nvidia.com/object/cuda_2_3_downloads.html
+
+   3.4 NVIDIA CUDA Toolkit
+
+       CUDA toolkit contains NVCC compiler and the relevant libraries.
+       You can download the toolkit from one of the following links.
+       If no special issues, we recommend you to use the latest one.
+
+       Toolkit version: 3.2
+       http://developer.nvidia.com/object/cuda_3_2_downloads.html
+
+       Toolkit version: 3.0
+       http://developer.nvidia.com/object/cuda_3_0_downloads.html
+
+       Toolkit version: 2.3
+       http://developer.nvidia.com/object/cuda_2_3_downloads.html
+
+   3.5 Compilers
+
+       We have successfully tested the package with the following compiler
+       versions. It is noted that GCC/++ 4.4 are not supported by NVCC
+       compilers yet. Besides, if you want to apply OpenMP to parallelize the
+       CPU code, you must have GCC/++ with version 4.2 or up.
+
+           - G++: 3.4, 4.1, 4.3, 4.4
+           - GCC: 3.4, 4.1, 4.3, 4.4
+           - CUDA Toolkit: 2.3, 3.0, 3.2, 4.0 RC2
+
+------------------------------ Chapter separator ------------------------------
+
+4. How to compile and run
+
+   4.1 Environment setting of the Makefile in the package
+
+       After you unzipped the package, please modify the Makefile file to fit
+       your environment setting and specific requirements for your need.
+
+       If you want to have a faster CPU implementation, you can enable OpenMP
+       to take advantage of the underlying multi-core platform. To enable
+       OpenMP, you must have GCC/++-4.2 or up and set OPENMP to be "true". The
+       default is false.
+
+           export OPENMP := "false"
+
+       To use the double precision computation hardware of your graphics card,
+       you can set DOUBLE_PRECISION to be "true". GT200 based cards support
+       double-precision, such as GTX260/275/280/285/295, Telsa C1060, Telsa
+       S1070, Quadro FX5800 and the new Fermi based cards. The default value
+       is "false". Note, enabling this variable on the platform not supporting
+       double precision hardware may cause execution failure.
+
+           export DOUBLE_PRECISION := "false"
+
+       Besides, please make sure your NVCC compiler is installed under
+       "/usr/local/cuda". If not, please modify the following variable.
+
+           export CUDA_INSTALL_PATH ?= /usr/local/cuda
+
+       Finally, you must make sure you provide the right compiler version for
+       your environment. Note, if your system has two compilers, for example,
+       GCC/++-4.3 and GCC/++-4.4, you must make sure /usr/bin/gcc and g++
+       point to the right compiler, GCC/++ version 4.3 in this example. NVCC
+       seems to use the library of /usr/bin/gcc as the default one during the
+       compilation without honoring the following variable definitions.
+
+           export CXX        ?= g++
+           export CC         ?= gcc
+           export LINKER     ?= g++ -fPIC
+           export AR         ?= ar
+           export RANLIB     ?= ranlib
+
+   4.2 Compile and make
+
+       At the first time, to build the package, please execute the following
+       command. This shall build all files, including necessary libraries.
+
+           $> make clean_all; make CUDA_ARCH=-arch\ sm_xx
+
+       Later, if you want to modify some of the source files without
+       rebuilding all necessary libraries, please execute the following
+       command.
+
+           $> make clean; make CUDA_ARCH=-arch\ sm_xx
+
+       To build with more information, you can add "verbose=1" in the command
+       line, as listed below.
+
+           $> make clean verbose=1; make verbose=1 CUDA_ARCH=-arch\ sm_xx
+
+       If you modified some macro definitions in any header files, .cuh or .h,
+       you must "make clean; make" to make sure the changes are propagated to
+       all source files.
+
+       For advanced users who would like to work under debug mode, please use
+       the following make command.
+
+           $> make clean_all debug=1 debug_xcpplib=1;make debug=1 debug_xcpplib=1 CUDA_ARCH=-arch\ sm_xx
+
+       Note that, to compile correctly, it is necessary to specify the compute capability 
+       of your GPU card in the Makefile command line (e.g., for a GTX 580, it should be 
+       CUDA_ARCH=-arch\ sm_20; wile for a GTX8800, it should be CUDA_ARCH=-arch\ sm_10). 
+       This is because gridding implementation prefers atomic operation on GPU if available.
+
+   4.3 Run the program
+
+       This chapter describes the basic usage of the IMPATIENT toolkit. For more 
+       information, please see http://impact.crhc.illinois.edu/mri.php. Before 
+       running the program, you must have data prepared. We provided a handful of 
+       datasets for your reference under the "data" directory.The basic usage of 
+       the IMPATIENT package to reconstruct an image is simple, and it typically 
+       looks something like the following commands:
+
+       Example 1: Use the brute force strategy to reconstruct a dataset called 
+                  64x64x1 located under data directory. 
+
+         (a) The number of CG iterations is 8 (by default). Use quadratic
+             regularization with the weighting parameter lambda set to be 
+             10^-2. 
+
+               $> ./mriSolver -idir mriData/64x64x1 -fdp 1e-2
+
+         (b) The number of CG iterations is 21. Use total variation regularization
+             with 1) the weighting parameter lambda set to be 10.0 and 2) the num-
+             ber of TV iteration set to be 16.
+
+               $> ./mriSolver -idir mriData/64x64x1 -cg_num 21 -tv -tv_num 16 -fdp 10.0
+
+       Example 2: Use the toeplitz strategies to reconstruct a dataset called 32x32x4:
+                  (12 time segments are used to approximate field inhomogeneity)
+ 
+         (a) Toeplitz with gridding is used. The number of CG iterations is 10 (-cg_num). Use total 
+             variation regularization (-tv) with the weighting parameter lambda set to be 10^4 (-tv_num).
+             The gridding oversampling factor for computing Q is set to 1.125 and the gridding
+             oversampling factor for computing FHD is set to 1.375 (-gridOS_Q and -gridOS_FH). 
+             Sparse matrix encoded with the finite difference regularization matrix is used (-reg).
+             to perform the regularization.
+              
+                $> ./mriSolver -idir mriData/32x32x4 -reg -cg_num 10 -toeplitzGridding \
+                               -tv -tv_num 10 -gpu_id 2 -ntime_segs 8 -fdp 1e4 \
+                               -gridOS_Q 1.125 -gridOS_FH 1.375 
+                   
+         (b) To replicate all the parameters and experimental settings in (a). 
+             Only this time, Toeplitz with direct evaluation is used and regularization 
+             is done by explicit finite difference calculations (i.e., without -reg flag).
+
+                $> ./mriSolver -idir mriData/32x32x4 -cg_num 10 -toeplitzDirect \
+                               -tv -tv_num 10 -gpu_id 2 -ntime_segs 8 -fdp 1e4 
+ 
+       Example 3: To run Toeplitz recon on all the sample data sets and then display 
+                  all the sample recons via Matlab. Use the following Bash script:
+
+                  #!/bin/bash 
+                  for file in `ls mriData`; do
+                    export dataDir=mriData/$file;
+                    ./mriSolver -idir $dataDir -cg_num 10 -toeplitzGridding -tv -tv_num 10 \ 
+                                -fdp 1e-6 -ntime_segs 8 -gridOS_Q 1.125 -gridOS_FH 1.375;
+                  done
+       
+       Also, there are more command options as listed below :
+
+         $> ./mriSolver <Options>
+
+       Mandatory options:
+         -idir <dir>         MRI input data directory.
+
+       Image enhancement options:
+
+         -toeplitzDirect     Use the toeplitz reconstruction strategy with direct evaluation.
+                             The default reconstruction strategy is brute force.
+ 
+         -toeplitzGridding   Use the toeplitz reconstruction strategy with gridding.
+                             The default gridding oversampling factor for Q is 1.125.
+                             The default gridding oversampling factor for FHD is 1.5.
+                             The default reconstruction strategy is brute force.
+         
+         -gridOS_Q <num>     Specify the gridding oversampling factor for Q. <num> has
+                             to be in the range [1.0,2.0]
+
+         -gridOS_FH <num>    Specify the gridding oversampling factor for FHD. <num> has
+                             to be in the range [1.0,2.0]
+         
+         -ntime_segs <num>   Specify how many time segments to be used by the Toeplitz
+                             reconstruction strategies.
+
+         -writeQ             This flag will cause the computed Q data structure to be written
+                             to hard disk. This can be useful when a user wants to re-use the saved
+                             Q for reconstruction of later slices, so as to save the time spent 
+                             to re-compute the same Q again.
+
+         -reuseQ <dir-to-Q>  This flag tells IMPATIENT to skip the computation of Q (i.e., step 1).
+                             Instead, a previously saved Q from hard disk will be re-used for
+                             reconstruction of the current slice in the CG step (i.e., step 3). 
+                             Note that <dir-to-Q> has to be the path name to the directory that contains
+                             the to-be-reused Q file. The to-be-reused Q file has to bear the filename
+                             'Q_stone.file'
+                             
+ 
+         -cg_num <num>       Number of iterations for the Conjugate Gradient method. 
+                             Default number of iteration is 8.
+
+         -reg                Enable roughness regularization that incorporates a priori 
+                             information to stablize reconstructions when data-consistency 
+                             constraints alone do not result in a sufficiently well-posed 
+                             inverse problem. 				     
+
+         -fd                 Enable finite difference penalizer. This penalizer denotes the
+                             finite difference of every pixel pair along the horizontal and 
+                             vertical directions of the image respectively.				  
+ 
+         -fdp <num>          Specify finite difference penalizer value. WARNING to the users 
+                             who would like to use regularization: this weight parameter lambda 
+                             is expected to significantly impact your reconstruction quality. 
+                             You are forced to choose the value of lambda properly based on your 
+                             data and application. IMPATIENT HAS NO DEFAULT VALUE FOR lambda and 
+                             NO AUTOMATIC WAY TO SELECT AN OPTIMAL lambda FOR YOU.                 
+
+         -tv                 Enable total variation regularization that penalizes the total amount 
+                             of gradient while preserving the edge information in the image. 
+
+         -tv_num <num>       Number of iterations for the total variation regularization. Default 
+                             number of iteration is 10. 
+
+         -tv_update          Enable updates of the outputs for each TV iteration.
+
+       Miscellaneous options:
+
+         -odir <dir>         MRI output data directory. If the output directory is not provided, 
+                             "<idir>/output" is used.
+
+         -cpu                Enable image reconstruction on CPUs as a comparison to the GPU counter-
+                             parts. Default is not enabled. This flag is not applicable to toeplitz 
+                             strategy as there is no corresponding cpu code availabe for toeplitz.
+                             
+         -mgpu               Enable multiple GPU computatoin when possible. When this option is not 
+                             specified, only one GPU is used.
+                             
+         -nogpu              Disable the GPU part computation. This enables the CPU computation automatically.
+                             
+         -version            Version of this release and the license.
+
+         -help               View this message.
+
+   4.4 Input/Output data and the corresponding formats
+
+       Here we list the input/output files and their corresponding information
+       so that you can feed our program with your data. If you'd like to
+       modify the program to fit your needs, you can start from the function,
+       loadInputData(), in "structures.cpp".
+
+       MRI conventions in IMPATIENT:
+           1) k-space is unitless, and should be contained within the window -N/2
+              to N/2. Take actual k-space trajectory (with units of 1/m) and multiply
+              by the field of view (in m) to get unitless k-space. Gridding specially
+              requires this and is part of the preferred Toeplitz pathway. However,
+              if only brute force or Toeplitz with direct evaluation is used, then the
+              limit will not be strictly enforced. 
+           2) Field map has a minus sign convention, field map phase term in the forward
+              signal model is exp(-i*\omega*t).
+           3) Field map is in units of radians/second. Time is in units of seconds
+
+       4.4.1 Inputs data
+
+           Each of our input MRI file consists of two parts: a header (in text format) and the
+           data (in binary format). The header consists of lines in text format of the following
+           form:
+ 
+                                         "<keywords> = <value>\n"
+
+           A complete list of header keywords, with brief explanations:
+
+           - "version":
+             A version identifier. The newest version number is equal to 0.20000.
+           - "xDimension" 
+             An integer number denoting the number of columns in the output image.
+           - "yDimension" 
+             An integer number denoting the number of rows in the output image.
+           - "zDimension" 
+             An integer number denoting the number of depths in the output image.
+           - "coil_number"
+             The number of coils.
+           - "slice_number"
+             The number of slices.
+           - "file_size"
+             The total number of single precision floating numbers in the data section.
+           - "Binary_Size" and "Binary:"
+             The data in the data section may be divided into meaningful pieces, each 
+             of which is labelled by "<Binary_size>=<value>\n" to denote the size (in 
+             floats), then immediately followed by "Binary:" and the actual binary data
+             for the piece.
+
+           The data part of the input file are also written in binary format using the following mode:
+
+           - single precision floats with the vector contents.
+
+           The size are N pixels in the image space, M k-space samples per coil and P coils.
+
+           fm.dat        Field map in units of Hertz. Positive sign 
+                         convention - (N-by-1)
+
+           idata_r.dat   Real part of the initial image estiamte (typically
+                         zeros) - (N-by-1)
+           idata_i.dat   Imaginary part of the initial image estiamte
+
+                         (typically zeros) - (N-by-1)
+           ix.dat        X-coordinates in image space (pixel grid) - (N-by-1)
+                         X-coordinates in terms of field of view, going from
+                         -0.5 to 0.5-delta_x, indicating the proportion of the
+                         field of view for the current spatial position.
+           iy.dat        Y-coordinates in image space (pixel grid) - (N-by-1)
+           iz.dat        Z-coordinates in image space (pixel grid) - (N-by-1)
+
+           kdata_i.dat   Real part of the k-space data (M*P-by-1)
+           kdata_r.dat   Imaginary part of the k-space data (M*P-by-1)
+
+           kx.dat        X-coordinate of the k-space trajectory - (M-by-1)
+                         Unitless k-space data format, where k-space typically
+                         runs from -matrix_size/2 to matrix_size/2-1. This is
+                         the k-space locations times the field of view.
+           ky.dat        Y-coordinate of the k-space trajectory - (M-by-1)
+           kz.dat        Z-coordinate of the k-space trajectory - (M-by-1)
+
+           mask.dat      Image space computation mask - (N-by-1)
+
+           t.dat         Acquisition time vector in seconds - (M-by-1)
+
+           sensi_r.dat   Real part of the Coil sensitivity - (N*P-by-1)
+           sensi_i.dat   Imaginary part of the Coil sensitivity - (N*P-by-1)
+
+           Note that in the 1.0 alpha release the iz and kz vectors are not used
+           (only the first element of the vector is used (should be zero). They
+           will be integrated in a further release.
+
+           Note that toeplitz part of the code also generates five intermediate
+           data files to facilites the computation of Q matrices etc. The five
+           intermediate files are ixQ.dat, iyQ.dat, izQ.dat and phiR.dat, phiI.dat.
+           These are computed based on the input files given above and are saved 
+           in the same directory as the input files given above. The five inter-
+           mediate files are managed by the internal implementation and should be
+           irrelevant to end users.
+
+       4.4.2 Output data
+
+       (a) Brute Force strategy:
+
+           Files are written in binary format using the following mode:
+
+           - single precision floats with the vector contents.
+
+           output_cpu_i.dat  Real part of the reconstructed image using CPU -
+                             (N-by-1)
+           output_cpu_r.dat  Imaginary part of the reconstructed image using
+                             CPU - (N-by-1)
+           output_gpu_i.dat  Real part of the reconstructed image using GPU -
+                             (N-by-1)
+           output_gpu_r.dat  Imaginary part of the reconstructed image using
+                             GPU - (N-by-1)
+ 
+        (b) Both Toeplitz strategies:
+          
+            The single output file named out.file is written in binary format 
+            in the input data directory using the following mode:
+          
+            - single precision floats
+            - out.file starts with real part of the reconstructed image and 
+              concludes with imaginary part the reconstructed image.
+            - one possible Matlab script to display the reconstructed image:
+   
+ 
+                        fp=fopen('out.file','r');
+                        recon = fread(fp,'single');
+                        len = length(recon);
+                        recon_r = recon(1:len/2);
+                        recon_i = recon(len/2+1:end);
+
+                        N = (len/2) ^ 0.5;
+                        gpu_output = reshape(recon_r+1i*recon_i,[N,N]);
+                        figure;
+                        imagesc(abs(gpu_output));
+                        colormap(gray);
+
+
+            Note that two sample Matlab scripts have been provided to display the
+            two output formats. They reside in the mriSolver directory:
+
+            - display_recon.m (Toeplitz)
+
+                e.g., MATLAB >> display_recon('mriData/64x64x1/out.file')
+
+            - display_recon2.m (Brute Force)
+
+                e.g., MATLAB >> display_recon2('mriData/64x64x1/')
+
+ 
+       4.5 Two more tutorials including code samples in the code package
+ 
+            The IMPATIENT package provides two code demonstrations under 
+
+                                   matlab_utils/ 
+
+            to help you get started on the path of reconstructing your own data
+            with IMPATIENT.
+
+            4.5.1 matlab_utils/create_sparse_matrix
+
+                  This folder contains the Matlab scripts that are used to generate 
+                  the regularization sparse matrices (i.e., those c.rmtx files in each
+                  data sub-directory, residing along with other input *.dat files). 
+                  The sparse matrices are first generated in memory using Matlab script 
+                  createDWithPeriodicBoundary.m, then written to hard disk via mmwrite.m. 
+                  c.rmtx is a format invented by Matrix Market. For more details, please
+                  refer to the README file under that directory.
+
+            4.5.2 matlab_utils/format_conversion
+
+                  This folder demonstrates an example of converting into IMPATIENT data format, 
+                  an MRI data stored in Matlab's mat file (i.e., recon_data_32x32x4.mat).
+                  Hopefully, this example will save our users' the pain to figure out the hard
+                  way how to convert their favorite MRI data format into the IMPATIENT's format.
+                  For more details, please refer to the README file under that directory.
+
+
+------------------------------ Chapter separator ------------------------------
+
+5. How to integrate it with your project
+
+   The main function in the file, main.cpp, is designed as an example for your
+   reference. The following code segment is the launch point.
+
+     result = mainMriSolver(input_dir, output_dir, iter_num, ...);
+     if (result == false) {
+         cerr<< "Error: Failed to execute the "<< prog<< ".\n";
+         goto _ERROR_mri_main;
+     }
+
+------------------------------ Chapter separator ------------------------------
+
+6. Todo list and future work
+
+   This section lists our ongoing tasks and future work.
+
+   Ongoing tasks:
+       - Further optimize the performance (e.g., thread coarsening).
+       - Improve the multi-gpu job dispatch queue and distribute the per-coil
+         computation across many GPUs.
+       - Extend the gridding kernels to a tiled implementation so that gridding
+         can be done on larger data sets, whose size would not fit in GPU at once. 
+       - Thorough comparison with existing methods (e.g., NUFFT)
+
+   Future work:
+       - Automatically detect the underlying GPU hardware capability and
+         choose the right parameters.
+
+------------------------------ End of README File -----------------------------
+

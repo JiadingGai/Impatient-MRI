@@ -1,0 +1,5 @@
+For the gridding-accelerated Toeplitz strategy, GPUs with 
+large memory (i.e., 1.5GB or more) are required to handle 
+the following data set:
+
+             1. 256x256x32-4coils 
