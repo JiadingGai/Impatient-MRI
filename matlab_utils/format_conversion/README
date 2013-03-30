@@ -1,0 +1,15 @@
+This folder demonstrates an example of converting into IMPATIENT data format, 
+an MRI data stored in Matlab's mat file (i.e., recon_data_32x32x4.mat).
+
+Hopefully, this example will save our users' the pain to figure out the hard
+way how to convert their favorite MRI data format into the IMPATIENT's format.
+
+data_interface.m first loads in all the MRI data vectors stored in 
+recon_data_32x32x4.mat, and then write them in the IMPATIENT's format by 
+call datawrite.m. The converted data is stored under the 32x32x4 directory, 
+which can serve as the direct input to IMPATIENT for reconstruction:
+
+        $> ./mriSolver -idir matlab_utils/format_conversion/32x32x4 -cg_num 10  \
+                       -toeplitzGridding -ntime_segs 8 -fdp 1e4 \
+                       -gridOS_Q 1.125 -gridOS_FH 1.375 
+                   
