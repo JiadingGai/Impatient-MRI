@@ -125,10 +125,10 @@ main (int argc, char **argv)
     float option_ntime_segments = NTIME_SEG_DEFAULT; // Set number of time segments (TOEPLITZ)
     float option_gridOS_Q   = GRIDOS_Q;     // Set gridding oversampling factor (for Q) to default
     float option_gridOS_FHD = GRIDOS_FHD;   // Set gridding oversampling factor (for FHD) to default
-	int   option_gpu_id = 0;//Set GPU device ID, default ID=0
-	bool  option_reuseQ = false;// set to true to enable the reuse of Q
-	string option_reuse_Qlocation;// It contains the location Q to be re-used if option_reuseQ=true
-	bool option_writeQ = false;
+    int   option_gpu_id = 0;//Set GPU device ID, default ID=0
+    bool  option_reuseQ = false;// set to true to enable the reuse of Q
+    string option_reuse_Qlocation;// It contains the location Q to be re-used if option_reuseQ=true
+    bool option_writeQ = false;
 
 
     bool  result = false;
@@ -157,17 +157,17 @@ main (int argc, char **argv)
             }
 
         } else if (!strcmp("-gpu_id", argv[i])) {
-			i++;
-			if (argv[i] && argv[i][0] != '-') {
+            i++;
+            if (argv[i] && argv[i][0] != '-') {
                option_gpu_id = atoi(argv[i]);
-			   if (option_gpu_id < 0) {
-				   cerr<< "\nError: invalid GPU device ID.\n";
-				   goto _ERROR_mri_main;
-			   }
-		    } else {
-				cerr<< "\nError: Missing gpu ID number.\n";
+               if (option_gpu_id < 0) {
+                   cerr<< "\nError: invalid GPU device ID.\n";
+                   goto _ERROR_mri_main;
+               }
+            } else {
+                cerr<< "\nError: Missing gpu ID number.\n";
                 goto _ERROR_mri_main;
-			}
+            }
 
         } else if (!strcmp("-cg_num", argv[i])) {
             i++;
@@ -208,88 +208,88 @@ main (int argc, char **argv)
             option_fd = true;
 
         } else if (!strcmp("-toeplitzGridding", argv[i])) {
-			option_toeplitz_gridding = true;
+            option_toeplitz_gridding = true;
 
-			option_nogpu = false;           // Disable GPU computation
+            option_nogpu = false;           // Disable GPU computation
             option_mgpu = false;            // Disable Multi-GPU computation
             option_cpu = false;             // Disable CPU computation
             option_toeplitz_direct = false; // Disable toeplitz computation with direct evaluation
 
-		} else if (!strcmp("-toeplitzDirect", argv[i])) {
-			option_toeplitz_direct = true;
+        } else if (!strcmp("-toeplitzDirect", argv[i])) {
+            option_toeplitz_direct = true;
 
-			option_nogpu = false;           // Disable GPU computation
+            option_nogpu = false;           // Disable GPU computation
             option_mgpu = false;            // Disable Multi-GPU computation
             option_cpu = false;             // Disable CPU computation
             option_toeplitz_gridding = false; // Disable toeplitz computation with direct evaluation
 
-		} else if(!strcmp("-reuseQ",argv[i])) {
-			i++;
-			if( (option_toeplitz_direct || option_toeplitz_gridding) &&
-				argv[i] && argv[i][0] != '-') {
-				option_reuseQ = true;
+        } else if(!strcmp("-reuseQ",argv[i])) {
+            i++;
+            if( (option_toeplitz_direct || option_toeplitz_gridding) &&
+                argv[i] && argv[i][0] != '-') {
+                option_reuseQ = true;
                 option_reuse_Qlocation = argv[i];
-			}
-			else {
-				cerr<<"\nError: -reuseQ flag requires toeplitz strategy to turn on.\n";
-				cerr<<"\nAlso, follwing -reuseQ, please specify the directory where Q resides.\n";
-				goto _ERROR_mri_main;
-			}
-		
-	    } else if (!strcmp("-writeQ",argv[i])) {
+            }
+            else {
+                cerr<<"\nError: -reuseQ flag requires toeplitz strategy to turn on.\n";
+                cerr<<"\nAlso, follwing -reuseQ, please specify the directory where Q resides.\n";
+                goto _ERROR_mri_main;
+            }
+        
+        } else if (!strcmp("-writeQ",argv[i])) {
 
-			option_writeQ = true;
-		
-		}
-		else if (!strcmp("-ntime_segs", argv[i])) { 
-			   i++;
-			   if( ((option_toeplitz_direct==true) || (option_toeplitz_gridding==true)) && 
+            option_writeQ = true;
+        
+        }
+        else if (!strcmp("-ntime_segs", argv[i])) { 
+               i++;
+               if( ((option_toeplitz_direct==true) || (option_toeplitz_gridding==true)) && 
                    argv[i] && argv[i][0] != '-' ) 
-			   {
-				   option_ntime_segments = atof(argv[i]);
-				   if(option_ntime_segments<1.0) {
-					   cerr<<"\nError: number of time segments has to be a natural number in floating format.\n";
-					   goto _ERROR_mri_main;
-				   }
-			   }
-			   else {
-			     cerr<< "\nError:-toeplitz flag is not found or invalid number of time segments.\n";
-				 goto _ERROR_mri_main;
-			   }
+               {
+                   option_ntime_segments = atof(argv[i]);
+                   if(option_ntime_segments<1.0) {
+                       cerr<<"\nError: number of time segments has to be a natural number in floating format.\n";
+                       goto _ERROR_mri_main;
+                   }
+               }
+               else {
+                 cerr<< "\nError:-toeplitz flag is not found or invalid number of time segments.\n";
+                 goto _ERROR_mri_main;
+               }
 
-		} else if (!strcmp("-gridOS_Q", argv[i])) { 
-			   i++;
-			   if( ((option_toeplitz_gridding==true)) && 
+        } else if (!strcmp("-gridOS_Q", argv[i])) { 
+               i++;
+               if( ((option_toeplitz_gridding==true)) && 
                    argv[i] && argv[i][0] != '-' ) 
-			   {
-				   option_gridOS_Q = atof(argv[i]);
-				   if(option_gridOS_Q<1.0 || option_gridOS_Q>2.0) {
-					   cerr<<"\nError: gridding oversampling factor should be in [1.0,2.0].\n";
-					   goto _ERROR_mri_main;
-				   }
-			   }
-			   else {
-			     cerr<< "\nError:-toeplitzGridding flag is not found or invalid gridding OS factor (Q).\n";
-				 goto _ERROR_mri_main;
-			   }
+               {
+                   option_gridOS_Q = atof(argv[i]);
+                   if(option_gridOS_Q<1.0 || option_gridOS_Q>2.0) {
+                       cerr<<"\nError: gridding oversampling factor should be in [1.0,2.0].\n";
+                       goto _ERROR_mri_main;
+                   }
+               }
+               else {
+                 cerr<< "\nError:-toeplitzGridding flag is not found or invalid gridding OS factor (Q).\n";
+                 goto _ERROR_mri_main;
+               }
 
-		} else if (!strcmp("-gridOS_FH", argv[i])) { 
-			   i++;
-			   if( ((option_toeplitz_gridding==true)) && 
+        } else if (!strcmp("-gridOS_FH", argv[i])) { 
+               i++;
+               if( ((option_toeplitz_gridding==true)) && 
                    argv[i] && argv[i][0] != '-' ) 
-			   {
-				   option_gridOS_FHD = atof(argv[i]);
-				   if(option_gridOS_FHD<1.0 || option_gridOS_FHD>2.0) {
-					   cerr<<"\nError: gridding oversampling factor should be in [1.0,2.0].\n";
-					   goto _ERROR_mri_main;
-				   }
-			   }
-			   else {
-			     cerr<< "\nError:-toeplitzGridding flag is not found or invalid gridding OS factor (FHD).\n";
-				 goto _ERROR_mri_main;
-			   }
+               {
+                   option_gridOS_FHD = atof(argv[i]);
+                   if(option_gridOS_FHD<1.0 || option_gridOS_FHD>2.0) {
+                       cerr<<"\nError: gridding oversampling factor should be in [1.0,2.0].\n";
+                       goto _ERROR_mri_main;
+                   }
+               }
+               else {
+                 cerr<< "\nError:-toeplitzGridding flag is not found or invalid gridding OS factor (FHD).\n";
+                 goto _ERROR_mri_main;
+               }
 
-		}  else if (!strcmp("-fdp", argv[i])) {
+        }  else if (!strcmp("-fdp", argv[i])) {
             i++;
             if (argv[i] && argv[i][0] != '-') {
                 // FD is enabled automatically when setting the FDP number.
@@ -390,19 +390,19 @@ main (int argc, char **argv)
     }
 
     if (option_fd || option_tv)
-	{
+    {
        bool fdp_flag = false;
        for (int i=1;i<argc;i++)
        {
           if ( !strcmp("-fdp",argv[i]) )
-			  fdp_flag = true;
+              fdp_flag = true;
        }
        if (!fdp_flag)
        {
-	      cerr<<"\n Error: Regularization enabled, but no weight parameter specified. Hint: -fdp [lambda].\n";
+          cerr<<"\n Error: Regularization enabled, but no weight parameter specified. Hint: -fdp [lambda].\n";
           goto _ERROR_mri_main;
        }
-	}
+    }
 
     cout<< endl;
 
@@ -416,16 +416,16 @@ main (int argc, char **argv)
                           option_fd, option_fdp,
                           option_tv, option_tv_num, option_tv_update,
                           option_toeplitz_direct, option_toeplitz_gridding,
-						  option_gridOS_Q, option_gridOS_FHD,
-						  option_ntime_segments, option_gpu_id,
-						  option_reuseQ, option_reuse_Qlocation,
-						  option_writeQ);
+                          option_gridOS_Q, option_gridOS_FHD,
+                          option_ntime_segments, option_gpu_id,
+                          option_reuseQ, option_reuse_Qlocation,
+                          option_writeQ);
     } else {
         result = bruteForce(idir, odir, option_cg_num, !option_nogpu,
                            option_mgpu, option_cpu, option_reg,
                            option_fd, option_fdp,
                            option_tv, option_tv_num, option_tv_update,
-						   option_gpu_id);
+                           option_gpu_id);
     }
 
     if (result == false) {

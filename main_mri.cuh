@@ -102,10 +102,10 @@ toeplitz(
     const bool enable_finite_difference, const float fd_penalizer,
     const bool enable_total_variation, const int tv_num,
     const bool enable_tv_update, const bool enable_toeplitz_direct, 
-	const bool enable_toeplitz_gridding, float gridOS_Q, float gridOS_FHD, 
-	const float ntime_segments,	const int gpu_id,
-	const bool enable_reuseQ, const string reuse_Qlocation,
-	const bool enable_writeQ);
+    const bool enable_toeplitz_gridding, float gridOS_Q, float gridOS_FHD, 
+    const float ntime_segments,    const int gpu_id,
+    const bool enable_reuseQ, const string reuse_Qlocation,
+    const bool enable_writeQ);
 
     bool
 bruteForce(
@@ -115,7 +115,7 @@ bruteForce(
     const bool enable_finite_difference, const float fd_penalizer,
     const bool enable_total_variation, const int tv_num,
     const bool enable_tv_update,
-	const int gpu_id);
+    const int gpu_id);
 
 /*---------------------------------------------------------------------------*/
 /*  Namespace declared - end                                                 */

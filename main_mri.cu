@@ -212,23 +212,23 @@ toeplitz(
     const bool enable_finite_difference, const float fd_penalizer,
     const bool enable_total_variation, const int tv_num,
     const bool enable_tv_update, const bool enable_toeplitz_direct, 
-	const bool enable_toeplitz_gridding, float gridOS_Q, float gridOS_FHD, 
-	const float ntime_segments,	const int gpu_id,
-	const bool enable_reuseQ, const string reuse_Qlocation,
-	const bool enable_writeQ)
+    const bool enable_toeplitz_gridding, float gridOS_Q, float gridOS_FHD, 
+    const float ntime_segments,    const int gpu_id,
+    const bool enable_reuseQ, const string reuse_Qlocation,
+    const bool enable_writeQ)
 {
 
     // Jiading GAI
     int deviceID = gpu_id;
-	int gpuCount = -1;
-	CUDA_SAFE_CALL(cudaGetDeviceCount(&gpuCount));
-	if(deviceID>=0 && deviceID<gpuCount) {
+    int gpuCount = -1;
+    CUDA_SAFE_CALL(cudaGetDeviceCount(&gpuCount));
+    if(deviceID>=0 && deviceID<gpuCount) {
       CUDA_SAFE_CALL(cudaSetDevice(deviceID));
-	}
+    }
     else {
-	  printf("\nError: GPU ID is out of the range [0,%d].\n",gpuCount-1);
-	  exit(1);
-	}
+      printf("\nError: GPU ID is out of the range [0,%d].\n",gpuCount-1);
+      exit(1);
+    }
     cudaDeviceProp prop;
     CUDA_SAFE_CALL( cudaGetDeviceProperties(&prop,deviceID) );
 
@@ -308,35 +308,35 @@ toeplitz(
 
 
     msg(MSG_PLAIN, "  Which GPU to run on    : %s (ID=%d)\n", prop.name, deviceID);
-	if(enable_toeplitz_gridding) {
+    if(enable_toeplitz_gridding) {
        msg(MSG_PLAIN, "  Recon method           : Toeplitz with gridding for Q and FHD\n");
        msg(MSG_PLAIN, "  Gridding OS for Q      : %f\n", gridOS_Q);
        msg(MSG_PLAIN, "  Gridding OS for FHD    : %f\n", gridOS_FHD);
-	}
-	else {
+    }
+    else {
        msg(MSG_PLAIN, "  Recon method           : Toeplitz with direct evaluation for Q and FHD\n");
-	}
-	if(enable_reuseQ) {
+    }
+    if(enable_reuseQ) {
        msg(MSG_PLAIN, "  Reuse Q                : Yes\n");
-	}
-	else {
+    }
+    else {
        msg(MSG_PLAIN, "  Reuse Q                : No\n");
-	}
-	if(enable_writeQ) {
+    }
+    if(enable_writeQ) {
        msg(MSG_PLAIN, "  Write Q to disk        : Yes\n");
-	}
-	else {
+    }
+    else {
        msg(MSG_PLAIN, "  Write Q to disk        : No\n");
-	}
+    }
     msg(MSG_PLAIN, "  Input folder           : %s\n", input_dir.c_str());
     msg(MSG_PLAIN, "  Output folder          : %s\n", input_dir.c_str());
-	msg(MSG_PLAIN, "  Number of coils        : %d\n", num_coil);
+    msg(MSG_PLAIN, "  Number of coils        : %d\n", num_coil);
     msg(MSG_PLAIN, "  Number of slices       : %d\n", num_slices);
     msg(MSG_PLAIN, "  Image data size (flat) : %d\n", num_i);
     msg(MSG_PLAIN, "  Image data size (yxz)  : (%d,%d,%d)\n", Ny,Nx,Nz);
     msg(MSG_PLAIN, "  K-space data size/coil : %d\n", num_k);
     msg(MSG_PLAIN, "  Number of CG iterations: %d\n", cg_num);
-	msg(MSG_PLAIN, "  Number of time segments: %f\n", ntime_segments);
+    msg(MSG_PLAIN, "  Number of time segments: %f\n", ntime_segments);
     if (enable_finite_difference) {
         msg(MSG_PLAIN, "  FD penalizer value     : %f\n", fd_penalizer);
     }
@@ -362,8 +362,8 @@ toeplitz(
     if (enable_toeplitz_direct||enable_toeplitz_gridding) {
 
        int phiR_datasize = num_k*num_coil; // num_k is k space data per coil.
-		float *phiR = (float*) calloc( phiR_datasize, sizeof(float) );
-		float *phiI = (float*) calloc( phiR_datasize, sizeof(float) );
+        float *phiR = (float*) calloc( phiR_datasize, sizeof(float) );
+        float *phiI = (float*) calloc( phiR_datasize, sizeof(float) );
         for(int i=0;i<phiR_datasize;i++)
         {
            phiR[i] = 1.0f;
@@ -382,11 +382,11 @@ toeplitz(
            writeDataFile_JGAI_10(phiI_filename.c_str(), version, Nx, Ny, Nz, num_coil, 1, phiR_datasize, phiI);
         }
         free(phiR);
-		free(phiI);
+        free(phiI);
         // */
 
 
-		// Step 1. compute Q's
+        // Step 1. compute Q's
         int numX_per_coil_Q = 2*Nx * 2*Ny * (Nz==1?1:(2*Nz));
         float **Qr, **Qi;
         Qr = (float **) calloc(((int) ntime_segments) + 1, sizeof(float *));
@@ -397,80 +397,80 @@ toeplitz(
         }
 
 
-		if(enable_reuseQ) {
+        if(enable_reuseQ) {
 
             printf("======== Step 1. Compute Q matrices: Q[%d] ========\n",static_cast<int>(ntime_segments+1));
-			// reuse Q is enabled, so no need to compute Q for this slice.
-			// However, we will do something sanity check below to make
-			// sure the Q data structure exists and its file size is consistent
-			// with the inputs:
+            // reuse Q is enabled, so no need to compute Q for this slice.
+            // However, we will do something sanity check below to make
+            // sure the Q data structure exists and its file size is consistent
+            // with the inputs:
             struct stat stat_Qfile;
-			string Q_path_temp = reuse_Qlocation + "/Q_stone.file";
-			printf("  Re-using the Q at %s\n", Q_path_temp.c_str());
-			if( lstat(Q_path_temp.c_str(), &stat_Qfile) < 0 ) 
+            string Q_path_temp = reuse_Qlocation + "/Q_stone.file";
+            printf("  Re-using the Q at %s\n", Q_path_temp.c_str());
+            if( lstat(Q_path_temp.c_str(), &stat_Qfile) < 0 ) 
             {
-			    printf("Error: bad directory path that contains the Q file\n");
-				printf("Please enter the directory path containing the Q file that you'd like to reuse\n");
-				exit(1);
-			}
-			else
-			{
-				if(1==Nz) 
-				{
-					// correct Q file size in bytes
-			        long long correct_Q_size = ((long long) ntime_segments + 1 ) *
-                 			                   ((long long) Nx) *
-				                               ((long long) Ny) *
-					                           ((long long) Nz) * 4 * 4 * 2;
+                printf("Error: bad directory path that contains the Q file\n");
+                printf("Please enter the directory path containing the Q file that you'd like to reuse\n");
+                exit(1);
+            }
+            else
+            {
+                if(1==Nz) 
+                {
+                    // correct Q file size in bytes
+                    long long correct_Q_size = ((long long) ntime_segments + 1 ) *
+                                                ((long long) Nx) *
+                                               ((long long) Ny) *
+                                               ((long long) Nz) * 4 * 4 * 2;
 
-					if(correct_Q_size!=stat_Qfile.st_size)
-					{
-					   printf("Error: incorrect Q file size\n");
-					   exit(1);
-					}
+                    if(correct_Q_size!=stat_Qfile.st_size)
+                    {
+                       printf("Error: incorrect Q file size\n");
+                       exit(1);
+                    }
 
-				}
-				else
-				{
-					// correct Q file size in bytes
-			        long long correct_Q_size = ((long long) ntime_segments + 1 ) *
-					                          ((long long) Nx) *
+                }
+                else
+                {
+                    // correct Q file size in bytes
+                    long long correct_Q_size = ((long long) ntime_segments + 1 ) *
+                                              ((long long) Nx) *
                                               ((long long) Ny) *
-	                                          ((long long) Nz) * 8 * 4 * 2;			
-	
-					if(correct_Q_size!=stat_Qfile.st_size)
-					{
-					   printf("Error: incorrect Q file size\n");
-					   exit(1);
-					}
-			
-				}
-			
-			}
-		}	
-		else {
+                                              ((long long) Nz) * 8 * 4 * 2;            
+    
+                    if(correct_Q_size!=stat_Qfile.st_size)
+                    {
+                       printf("Error: incorrect Q file size\n");
+                       exit(1);
+                    }
+            
+                }
+            
+            }
+        }    
+        else {
 
         printf("======== Step 1. Compute Q matrices: Q[%d] ========\n",static_cast<int>(ntime_segments+1));
         //  Note that:
         //  Data prepartion : Toeplitz needs more data files than 
         //  Brute Force for the computation of Q. They are ixQ.dat, 
-		//  iyQ.dat, izQ.dat and phiR.dat, phiI.dat. We are generating 
-		//  them now.
+        //  iyQ.dat, izQ.dat and phiR.dat, phiI.dat. We are generating 
+        //  them now.
         ///*
                 // 3D - JGAI - BEGIN 
-	    float *ixQ=NULL, *iyQ=NULL, *izQ=NULL;
+        float *ixQ=NULL, *iyQ=NULL, *izQ=NULL;
         if(Nz>1) // a 3D slice
         {
-	       ixQ = (float*) calloc( (2*Nx)*(2*Ny)*(2*Nz), sizeof(float) );
-    	   iyQ = (float*) calloc( (2*Nx)*(2*Ny)*(2*Nz), sizeof(float) );
-	       izQ = (float*) calloc( (2*Nx)*(2*Ny)*(2*Nz), sizeof(float) );
-		
+           ixQ = (float*) calloc( (2*Nx)*(2*Ny)*(2*Nz), sizeof(float) );
+           iyQ = (float*) calloc( (2*Nx)*(2*Ny)*(2*Nz), sizeof(float) );
+           izQ = (float*) calloc( (2*Nx)*(2*Ny)*(2*Nz), sizeof(float) );
+        
            int index =0;
            for(int y=-Ny;y<Ny;y++)
            for(int x=-Nx;x<Nx;x++)
            for(int z=-Nz;z<Nz;z++)
            {
-		      iyQ[index] = ((float) y) / ((float) Ny);
+              iyQ[index] = ((float) y) / ((float) Ny);
               ixQ[index] = ((float) x) / ((float) Nx);
               izQ[index] = ((float) z) / ((float) Nz);
               index++;
@@ -478,10 +478,10 @@ toeplitz(
         }
         else if(Nz==1) // a 2D slice
         {
-	       ixQ = (float*) calloc( (2*Nx)*(2*Ny), sizeof(float) );
-    	   iyQ = (float*) calloc( (2*Nx)*(2*Ny), sizeof(float) );
-	       izQ = (float*) calloc( (2*Nx)*(2*Ny), sizeof(float) );
-			  
+           ixQ = (float*) calloc( (2*Nx)*(2*Ny), sizeof(float) );
+           iyQ = (float*) calloc( (2*Nx)*(2*Ny), sizeof(float) );
+           izQ = (float*) calloc( (2*Nx)*(2*Ny), sizeof(float) );
+              
            int index =0;
            for(int y=-Ny;y<Ny;y++)
            for(int x=-Nx;x<Nx;x++)
@@ -506,7 +506,7 @@ toeplitz(
 
         if(version==0.2f)
         {
-		   int rows;
+           int rows;
            if(1 == Nz) // 2D
            {
              rows = (2*Ny)*(2*Nx);
@@ -516,7 +516,7 @@ toeplitz(
              rows = (2*Ny)*(2*Nx)*(2*Nz);
            }
 
-		   int ixQ_datasize = rows;
+           int ixQ_datasize = rows;
            writeDataFile_JGAI(ixQ_filename.c_str(), version, rows, num_coil, 1, ixQ_datasize, ixQ);
            writeDataFile_JGAI(iyQ_filename.c_str(), version, rows, num_coil, 1, ixQ_datasize, iyQ);
            writeDataFile_JGAI(izQ_filename.c_str(), version, rows, num_coil, 1, ixQ_datasize, izQ);
@@ -542,18 +542,18 @@ toeplitz(
            writeDataFile_JGAI_10(iyQ_filename.c_str(), version, Nx_Q, Ny_Q, Nz_Q, -1, 1, ixQ_datasize, iyQ);
            writeDataFile_JGAI_10(izQ_filename.c_str(), version, Nx_Q, Ny_Q, Nz_Q, -1, 1, ixQ_datasize, izQ);
         }
-		free(ixQ);
-		free(iyQ);
-		free(izQ);
+        free(ixQ);
+        free(iyQ);
+        free(izQ);
 
     
  
         string Q_filename = input_dir + "/Q_stone.file";
         toeplitz_computeQ_GPU ( input_dir.c_str(), ntime_segments, Nx, Ny, Nz, 
-				                Q_filename.c_str(), Qr, Qi, enable_toeplitz_direct, 
-								enable_toeplitz_gridding, gridOS_Q, enable_writeQ ); 
+                                Q_filename.c_str(), Qr, Qi, enable_toeplitz_direct, 
+                                enable_toeplitz_gridding, gridOS_Q, enable_writeQ ); 
 
-		}
+        }
 
 
 
@@ -566,7 +566,7 @@ toeplitz(
         toeplitz_computeFH_GPU ( input_dir.c_str(), ntime_segments, 
                                  Nx, Ny, Nz, Fhd_filename.c_str(), 
                                  Fhd_outR, Fhd_outI, enable_toeplitz_direct, 
-								 enable_toeplitz_gridding, gridOS_FHD ); 
+                                 enable_toeplitz_gridding, gridOS_FHD ); 
         
         // Step 3. recon
         int toe_argc = 18;
@@ -585,10 +585,10 @@ toeplitz(
         float lambda2 = fd_penalizer; sprintf(toe_argv[7], "%f",lambda2);
         sprintf(toe_argv[8],"D.file"); sprintf(toe_argv[9],"Dp.file");
         sprintf(toe_argv[10],"R.file"); sprintf(toe_argv[11],"W.file");
-		/*
-		 * If the -reuseQ flag is turned, toe_argv[12] stores the location
-		 * where the to-be-reused Q is saved at.
-		 */
+        /*
+         * If the -reuseQ flag is turned, toe_argv[12] stores the location
+         * where the to-be-reused Q is saved at.
+         */
         sprintf(toe_argv[12],"%s/Q_stone.file",reuse_Qlocation.c_str());
 
         sprintf(toe_argv[13],"%s/FhD.file",input_dir.c_str());
@@ -599,14 +599,14 @@ toeplitz(
 
         #ifdef DEBUG
         for(int i=0;i<toe_argc;i++)
-		{
-			printf("argv[%d] = %s\n", i, toe_argv[i]);
-		}
+        {
+            printf("argv[%d] = %s\n", i, toe_argv[i]);
+        }
         #endif
 
         toeplitz_recon(toe_argc, toe_argv, enable_total_variation, 
                        enable_regularization, enable_finite_difference, enable_reuseQ, 
-					   &c, Fhd_outR, Fhd_outI, Qr, Qi);
+                       &c, Fhd_outR, Fhd_outI, Qr, Qi);
  
         for(int i=0;i<toe_argc;i++)
             free( toe_argv[i] );
@@ -657,7 +657,7 @@ bruteForce(
     const bool enable_finite_difference, const float fd_penalizer,
     const bool enable_total_variation, const int tv_num,
     const bool enable_tv_update,
-	const int gpu_id)
+    const int gpu_id)
 {
     // =======================================================================
     //  Define variables
@@ -744,7 +744,7 @@ bruteForce(
     msg(MSG_PLAIN, "  Recon method           : Brute Force\n");
     msg(MSG_PLAIN, "  Input folder           : %s\n", input_dir.c_str());
     msg(MSG_PLAIN, "  Output folder          : %s\n", output_dir.c_str());
-	msg(MSG_PLAIN, "  Number of coils        : %d\n", num_coil);
+    msg(MSG_PLAIN, "  Number of coils        : %d\n", num_coil);
     msg(MSG_PLAIN, "  Number of slices       : %d\n", num_slices);
     msg(MSG_PLAIN, "  Image data size        : %d\n", num_i);
     msg(MSG_PLAIN, "  Image data size (yxz)  : (%d,%d,%d)\n", Ny,Nx,Nz);
