@@ -524,11 +524,11 @@ nal Symposium on Biomedical Imaging (ISBI) 2010.
          -reg                Enable roughness regularization that incorporates a priori 
                              information to stablize reconstructions when data-consistency 
                              constraints alone do not result in a sufficiently well-posed 
-                             inverse problem. 				     
+                             inverse problem.                      
 
          -fd                 Enable finite difference penalizer. This penalizer denotes the
                              finite difference of every pixel pair along the horizontal and 
-                             vertical directions of the image respectively.				  
+                             vertical directions of the image respectively.                  
  
          -fdp <num>          Specify finite difference penalizer value. WARNING to the users 
                              who would like to use regularization: this weight parameter lambda 
