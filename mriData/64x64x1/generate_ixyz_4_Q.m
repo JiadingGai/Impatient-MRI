@@ -1,0 +1,15 @@
+N = 64;
+[ixQ,iyQ] = meshgrid([-N:N-1]/(N),[-N:N-1]/(N));
+ixQ = ixQ;
+iyQ = iyQ;
+ixQ = ixQ(:);
+iyQ = iyQ(:);
+izQ = zeros(size(ixQ));
+version = 0.2;
+rows = 2*N*2*N;
+ncoils = 1;
+nslices = 1;
+file_datasize = rows * ncoils;
+datawrite(version,rows,ncoils,nslices,file_datasize,ixQ,'ixQ.dat');
+datawrite(version,rows,ncoils,nslices,file_datasize,iyQ,'iyQ.dat');
+datawrite(version,rows,ncoils,nslices,file_datasize,izQ,'izQ.dat');
