@@ -144,6 +144,7 @@ endif
 
 # Override the options given above
 CUDA_ARCH := -arch sm_10
+CUDA_ARCH := -gencode arch=compute_37,code=sm_37
 
 ifeq ($(COMPUTE_FLOPS), "true")
   CXXFLAGS += -DENABLE_COMPUTE_FLOPS
