@@ -6,7 +6,6 @@ if( ~exist([fname '/output/']) )
    return;
 end
 
-
 if( exist([fname '/output/output_gpu_r.dat']) && exist([fname '/output/output_gpu_i.dat']) )
    load([fname '/output/output_gpu_r.dat']);
    load([fname '/output/output_gpu_i.dat']);
@@ -46,7 +45,6 @@ if( exist([fname '/output/output_gpu_r.dat']) && exist([fname '/output/output_gp
  end
  
 end
-
 
 
 

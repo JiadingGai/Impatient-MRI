@@ -46,7 +46,6 @@ else
 end
 
 
-
 %[pathstr, name, ext] = fileparts(fname);
 %pathstr(find(pathstr==filesep))='_';
 %output_file_name = [pathstr(9:end) '_Toeplitz.png'];
