@@ -194,51 +194,72 @@ smvmGpu(
 /*                                                                           */
 /*===========================================================================*/
 
-/*
- * These textures are (optionally) used to cache the 'x' vector in y += A*x
- */
-texture<float, 1> tex_x_float;
-texture<int2, 1>  tex_x_double;
-
-// Use int2 to pull doubles through texture cache
-    void
-bind_x(const float *x)
-{   cutilSafeCall(cudaBindTexture(NULL, tex_x_float, x));   }
-
-    void
-bind_x(const double *x)
-{   cutilSafeCall(cudaBindTexture(NULL, tex_x_double, x));   }
-
-    void
-unbind_x(const float *x)
-{   cutilSafeCall(cudaUnbindTexture(tex_x_float)); }
-
-    void
-unbind_x(const double *x)
-{   cutilSafeCall(cudaUnbindTexture(tex_x_double)); }
-
-// Note: x is unused, but distinguishes the two functions
-    template <bool UseCache>
-    __inline__ __device__ float
-fetch_x(const int & i, const float *x)
-{
-    if (UseCache) return tex1Dfetch(tex_x_float, i);
+#if USE_CACHE
+  /*
+   * These textures are (optionally) used to cache the 'x' vector in y += A*x
+   */
+  texture<float, 1> tex_x_float;
+  texture<int2, 1>  tex_x_double;
+  
+  // Use int2 to pull doubles through texture cache
+      void
+  bind_x(const float *x)
+  {   cutilSafeCall(cudaBindTexture(NULL, tex_x_float, x));   }
+  
+      void
+  bind_x(const double *x)
+  {   cutilSafeCall(cudaBindTexture(NULL, tex_x_double, x));   }
+  
+      void
+  unbind_x(const float *x)
+  {   cutilSafeCall(cudaUnbindTexture(tex_x_float)); }
+  
+      void
+  unbind_x(const double *x)
+  {   cutilSafeCall(cudaUnbindTexture(tex_x_double)); }
+  
+  // Note: x is unused, but distinguishes the two functions
+      template <bool UseCache>
+      __inline__ __device__ float
+  fetch_x(const int & i, const float *x)
+  {
+      if (UseCache) return tex1Dfetch(tex_x_float, i);
+      else return x[i];
+  }
+  
+  #if !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)
+      template <bool UseCache>
+      __inline__ __device__ double
+  fetch_x(const int & i, const double *x)
+  {
+      if (UseCache) {
+          int2 v = tex1Dfetch(tex_x_double, i);
+          return __hiloint2double(v.y, v.x);
+      } else {
+          return x[i];
+      }
+  }
+  #endif // !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)
+#else
+  // FIXME(JDG)!!: update texture binding to the latest cuda version
+  
+  // Note: x is unused, but distinguishes the two functions
+      template <bool UseCache>
+      __inline__ __device__ float
+  fetch_x(const int & i, const float *x)
+  {
     else return x[i];
-}
-
-#if !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)
-    template <bool UseCache>
-    __inline__ __device__ double
-fetch_x(const int & i, const double *x)
-{
-    if (UseCache) {
-        int2 v = tex1Dfetch(tex_x_double, i);
-        return __hiloint2double(v.y, v.x);
-    } else {
-        return x[i];
-    }
-}
-#endif // !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)
+  }
+  
+  #if !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)
+      template <bool UseCache>
+      __inline__ __device__ double
+  fetch_x(const int & i, const double *x)
+  {
+    return x[i];
+  }
+  #endif // !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)
+#endif
 
 #ifdef emu
     #define EMUSYNC __syncthreads()
