@@ -248,7 +248,7 @@ smvmGpu(
       __inline__ __device__ float
   fetch_x(const int & i, const float *x)
   {
-    else return x[i];
+    return x[i];
   }
   
   #if !defined(CUDA_NO_SM_13_DOUBLE_INTRINSICS)

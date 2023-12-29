@@ -559,7 +559,7 @@ programUsage(FILE *fp)
 "        time, Toeplitz with direct evaluation is used and regularization is done by\n" 
 "        explicit finite difference calculations (i.e., without -reg flag).\n"
 "\n"
-"        $> ./mriSolver -idir mriData/64x64x16 -cg_num 10 -toeplitzDirect \\ \n"
+"        $> ./mriSolver -idir mriData/64x64x16-4coils -cg_num 10 -toeplitzDirect \\ \n"
 "                       -tv -tv_num 10 -gpu_id 2 -ntime_segs 8 -fdp 1e4 \n" 
 "\n"
 , mriSolver_name, CG_NUM_DEFAULT, TV_NUM_DEFAULT
