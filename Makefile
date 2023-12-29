@@ -42,7 +42,7 @@ LIBDIR ?= $(MRISOLVER)/lib/$(OSLOWER)
 
 # CUDA SDK code sample library path
 export CUDA_SDK_DIR  := $(MRISOLVER)/cuda_sdk
-export CUDA_SDK_LIB  := -L$(CUDA_SDK_DIR)/lib/$(OSLOWER) -lcutil
+export CUDA_SDK_LIB  := -L$(CUDA_SDK_DIR)/lib/$(OSLOWER) -lcutil -lpthread
 export CUDA_SDK_OBJ  = $(CUDA_SDK_DIR)/obj/$(OSLOWER)/$(BINSUBDIR)
 
 export BRUTEFORCE_DIR  := $(MRISOLVER)/bruteForce
@@ -82,8 +82,8 @@ COMMONFLAGS := -use_fast_math
 
 # Enable multi-threading in CPU code if OpenMP is supported.
 
-export OPENMP := "true"
-#export OPENMP := "false"
+#export OPENMP := "true"
+export OPENMP := "false"
 
 # Enable double-precision support or not. It is supported in GT200 based
 # cards, GTX260/275/280/285/295, Telsa C1060, Telsa S1070, Quadro FX5800
