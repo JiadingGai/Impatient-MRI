@@ -24,7 +24,7 @@ def read_text(fileName):
 def render_image(recon_r, recon_i, outfile='__output.png'):
     assert len(recon_r) == len(recon_i)
     Len = len(recon_r)
-    N = int(np.sqrt(len))
+    N = int(np.sqrt(Len))
     out = np.empty(shape=[Len,], dtype=np.csingle)
     out.real = recon_r
     out.imag = recon_i
